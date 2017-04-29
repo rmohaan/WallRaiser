@@ -1,4 +1,5 @@
 ﻿using System;
+using MesoketesBattle;
 
 namespace WallRaiser
 {
@@ -6,61 +7,61 @@ namespace WallRaiser
     {
         static void Main(string[] args)
         {
-            string n = "Day 1$ T1 - S - X - 4: T1 - N - X - 2: T3 - W - X - 3; Day 2$ T2 - S - X - 5: T2 - N - X - 1: T3 - N - X - 3; Day 3$ T1 - W - X - 2: T1 - W - X - 4: T2 - N - X - 3: T2 - S - X - 4";
-            n =
-                "Day 1$ T1 - S - X - 4: T1 - N - X - 2: T3 - W - X - 3; Day 2$ T2 - S - X - 5: T2 - N - X - 1: T3 - N - X - 3; Day 3$ T1 - W - X - 2: T1 - W - X - 4: T2 - N - X - 3: T2 - S - X - 4";
-            n = "Day 1$ T1 - E - X - 4; Day 2$ T1 - W - X - 3 : T2 - E - X - 3; Day 3$ T3 - N - X - 2: T2 - W - X - 4";
-            n = "Day 1$ T1 - N - X - 5 : T2 - N - Y - 1;Day 2$ T1 - S - X - 2";
-            var daysOfAttack = n.Split(';');
-            var successfulAttacks = 0;
-            foreach (var day in daysOfAttack)
+            StartProgram();
+            Console.ReadLine();
+        }
+
+        public static void StartProgram()
+        {
+            Console.WriteLine("Provide initial height of the wall DEFAULT=0");
+            var defHeight = Console.ReadLine();
+
+            int initialHeight;
+            int.TryParse(defHeight, out initialHeight);
+
+            var reader = GetInputReader();
+            var input = reader.ReadInput();
+
+            if (string.IsNullOrEmpty(input))
             {
-                var troops = day.Split('$')[1];
-                var attacks = troops.Split(':');
-                foreach (var attack in attacks)
-                {
-                    var hits = attack.Split('-');
-                    var attackWall = hits[1].Trim();
-                    var weapon = hits[2].Trim();
-                    var attackStrength = int.Parse(hits[3]);
-                    //Console.WriteLine(hits[1] + " " + hits[3]);
-                    switch (attackWall)
-                    {
-                        case "S":
-                            var southWall = SouthWall.GetSouthWall();
-                            if (southWall.AttackWall(southWall, weapon, attackStrength))
-                            {
-                                successfulAttacks++;
-                            }
-                        break;
-                        case "N":
-                            var northWall = NorthWall.GetNorthWall();
-                            if (northWall.AttackWall(northWall, weapon, attackStrength))
-                            {
-                                successfulAttacks++;
-                            }
-                        break;
-                        case "W":
-                            var westWall = WestWall.GetWestWall();
-                            if (westWall.AttackWall(westWall, weapon, attackStrength))
-                            {
-                                successfulAttacks++;
-                            }
-                        break;
-                        case "E":
-                            var eastWall = EastWall.GetEastWall();
-                            if (eastWall.AttackWall(eastWall, weapon, attackStrength))
-                            {
-                                successfulAttacks++;
-                            }
-                            break;
-                    }
-                }
+                StopApplication();
             }
 
-           Console.WriteLine("Successful Attacks {0}", successfulAttacks);
+            Console.WriteLine("Initializing Battle...");
+            var successfulAttacks = StartBattle(input, initialHeight);
+            Console.WriteLine("Collating Battle Results...");
+            Console.WriteLine("Total Successful Attacks:  {0}", successfulAttacks);
+        }
 
-            Console.ReadLine();
+        public static int StartBattle(string input, int initialHeight)
+        {
+            var battle = new Battle();
+            try
+            {
+                battle.Initialize(input);
+                Console.WriteLine("Processing Battle...");
+                var successfulAttacks = battle.ProcessBattle(initialHeight);
+                Console.WriteLine("Battle completed...");
+                return successfulAttacks;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return 0;
+        }
+
+        private static void StopApplication()
+        {
+            Environment.Exit(1);
+        }
+
+        private static InputReader GetInputReader()
+        {
+            Console.WriteLine("Enter the Input Format 1 - Console, 2 - File, DEFAULT - static input");
+            string inpFormat = Console.ReadLine();
+            var reader = ReaderFactory.GetReader(inpFormat);
+            return reader;
         }
     }
 }
